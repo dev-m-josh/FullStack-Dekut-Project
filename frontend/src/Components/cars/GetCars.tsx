@@ -61,13 +61,40 @@ export default function GetCars() {
         switch (action) {
             case "update":
                 // Handle update logic
-                alert(`Update car: ${car.carModel}`);
+                if (confirm(`Do you want to update ${car.carModel}?`)) {
+                    console.log("Updating car with ID:", car.carID);
+                    alert(`Update car: ${car.carModel}`);
+                }
                 break;
             case "delete":
                 // Handle delete logic
                 if (confirm(`Are you sure you want to delete ${car.carModel}?`)) {
-                    console.log("Deleting car with ID:", car.carID);
-                    alert(`Car ${car.carModel} has been deleted.`);
+                    const deleteCar = async () => {
+                        try {
+                            const response = await fetch(`http://localhost:3000/cars/${car.carID}`, {
+                                method: "DELETE",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`${response.statusText}`);
+                            }
+
+                            setCars((prevCars) => prevCars.filter((c) => c.carID !== car.carID));
+                        } catch (err) {
+                            if (err instanceof Error) {
+                                console.error("Error deleting car:", err);
+                                alert(`Failed to delete car: ${err.message}`);
+                            } else {
+                                console.error("Unexpected error:", err);
+                                alert("An unexpected error occurred while deleting the car.");
+                            }
+                        }
+                        alert(`Car ${car.carModel} has been deleted.`);
+                    };
+                    deleteCar();
                 }
                 break;
             case "toggleAvailability":
